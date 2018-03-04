@@ -72,7 +72,7 @@ class AskBot < Roda
       if responses.count <= page * 20 || page == 0
         {
           "response_type": "in_channel",
-          "text": "Page #{page}\n#{responses.limit(20, page * 20).map([:id, :name, :response]).join("\n")}"
+          "text": "Page #{page}\n#{responses.limit(20, page * 20).map([:id, :name, :response]).join("\n")}",
           "mrkdwn": true
         }
       end
