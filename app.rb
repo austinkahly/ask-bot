@@ -22,6 +22,13 @@ class AskBot < Roda
       responses.insert(name: name, response: response)
     end
 
+    r.get "help" do
+      {
+        "response_type": "in_channel",
+        "text": "Use /ask add <name> <quote> to add new quotes."
+      }
+    end
+
     r.get "ask" do
       if !r["id"].nil? and r["id"].to_i != 0
         resp = DB[:responses].where(id: r["id"].to_i)
@@ -39,10 +46,18 @@ class AskBot < Roda
         resp = responses.order(Sequel.lit('RANDOM()')).limit(1)
       end
       if resp.count == 0
+        {
+          "response_type": "in_channel",
+          "text": "Start quoting people to get responses."
+        }
 
       else
         resp = resp.map([:name, :response]).first
-        "#{resp.first.capitalize} - \"#{resp.last}\""
+        {
+          "response_type": "in_channel",
+          "text": "#{resp.first.capitalize} - \"#{resp.last}\"",
+          "mrkdwn": true
+        }
       end
     end
 
@@ -55,7 +70,11 @@ class AskBot < Roda
       page = r["page"].to_i ||= 0
       responses = DB[:responses]
       if responses.count <= page * 20 || page == 0
-        responses.limit(20, page * 20).map([:id, :name, :response]).to_s
+        {
+          "response_type": "in_channel",
+          "text": "Page #{page}\n#{responses.limit(20, page * 20).map([:id, :name, :response]).join("\n")}"
+          "mrkdwn": true
+        }
       end
     end
 
