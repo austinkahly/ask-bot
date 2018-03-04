@@ -13,7 +13,7 @@ end
 
 class AskBot < Roda
   route do |r|
-    r.post "save" do
+    r.on "save" do
       name = r["name"].downcase
       response = r["response"]
 
@@ -22,17 +22,19 @@ class AskBot < Roda
       responses.insert(name: name, response: response)
     end
 
-    r.get "help" do
+    r.on "help" do
       {
         "response_type": "in_channel",
         "text": "Use /ask add <name> <quote> to add new quotes."
       }.to_json
     end
 
-    r.get "ask" do
+    r.on "ask" do
       if !r["id"].nil? and r["id"].to_i != 0
         resp = DB[:responses].where(id: r["id"].to_i)
       else
+        # If this returns none, maybe throw an error that they need to add
+        # something for that person?
         if !r["name"].nil? and r["name"] != ""
           responses = DB[:responses].where(name: r["name"].downcase)
         else
@@ -62,11 +64,11 @@ class AskBot < Roda
     end
 
     # Returns the number of entries per person. Mainly to make sure we don't bloat the database.
-    r.get "info" do
+    r.on "info" do
       DB[:responses].group_and_count(:name).all.to_s
     end
 
-    r.get "list" do
+    r.on "list" do
       page = r["page"].to_i ||= 0
       responses = DB[:responses]
       if responses.count <= page * 20 || page == 0
@@ -75,18 +77,6 @@ class AskBot < Roda
           "text": "Page #{page}\n#{responses.limit(20, page * 20).map([:id, :name, :response]).join("\n")}",
           "mrkdwn": true
         }.to_json
-      end
-    end
-
-    r.post "seed_database" do
-      responses = DB[:responses]
-      data_to_seed = ["How can I smell my feet if they are in your mouth?", "I like green apples because they make me horny", "You mean they have a better change of being frogged checked", "Terabytes, they are like the modern day ram. Dodge Ram not computer ram.", "You tasty little poptart", "You're in timeout mr."]
-
-      # Don't seed twice.):
-      if responses.where(response: data_to_seed.first) == nil
-        data_to_seed.each do |msg|
-          responses.insert(name: "kevin", response: msg)
-        end
       end
     end
   end
