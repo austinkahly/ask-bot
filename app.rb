@@ -26,7 +26,7 @@ class AskBot < Roda
       {
         "response_type": "in_channel",
         "text": "Use /ask add <name> <quote> to add new quotes."
-      }
+      }.to_json
     end
 
     r.get "ask" do
@@ -49,7 +49,7 @@ class AskBot < Roda
         {
           "response_type": "in_channel",
           "text": "Start quoting people to get responses."
-        }
+        }.to_json
 
       else
         resp = resp.map([:name, :response]).first
@@ -57,7 +57,7 @@ class AskBot < Roda
           "response_type": "in_channel",
           "text": "#{resp.first.capitalize} - \"#{resp.last}\"",
           "mrkdwn": true
-        }
+        }.to_json
       end
     end
 
@@ -74,7 +74,7 @@ class AskBot < Roda
           "response_type": "in_channel",
           "text": "Page #{page}\n#{responses.limit(20, page * 20).map([:id, :name, :response]).join("\n")}",
           "mrkdwn": true
-        }
+        }.to_json
       end
     end
 
