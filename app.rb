@@ -1,10 +1,13 @@
 require "roda"
 require "sequel"
+require "yaml"
 
-database = "myapp_development"
-user     = 'root'
+user = 'root'
 password = 'pass'
-DB = Sequel.connect(adapter: "postgres", database: database, host: "127.0.0.1", user: user, password: password)
+database = 'ask-bot'
+
+DB = Sequel.connect(YAML.load(File.read(File.join('config','database.yml')))[ENV['RACK_ENV']])
+# DB = Sequel.connect(adapter: "postgres", database: database, host: "127.0.0.1", user: user, password: password)
 
 class App < Roda
   route do |r|

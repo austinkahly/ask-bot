@@ -12,6 +12,7 @@ gem 'rake', '> 10.0'
 
 gem 'pg'
 gem 'sequel'
+gem 'puma'
 
 group :development do
   gem 'shotgun', '~> 0.9.2'
