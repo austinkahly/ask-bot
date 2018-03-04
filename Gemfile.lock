@@ -45,7 +45,7 @@ DEPENDENCIES
   erubis
   pg
   puma
-  rake (> 10.0)
+  rake
   roda
   roda-bin
   sequel

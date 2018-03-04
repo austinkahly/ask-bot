@@ -9,7 +9,7 @@ gem "erubis"
 gem 'pg'
 gem 'sequel'
 
-gem 'rake', '> 10.0'
 gem 'puma'
+gem 'rake'
 
 ruby "2.3.1"
