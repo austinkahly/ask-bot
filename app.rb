@@ -9,7 +9,7 @@ database = 'ask-bot'
 DB = Sequel.connect(YAML.load(File.read(File.join('config','database.yml')))[ENV['RACK_ENV']])
 # DB = Sequel.connect(adapter: "postgres", database: database, host: "127.0.0.1", user: user, password: password)
 
-class App < Roda
+class AskBot < Roda
   route do |r|
     r.post "save" do
       name = r["name"].downcase
