@@ -14,23 +14,56 @@ class AskBot < Roda
     r.post "save" do
       name = r["name"].downcase
       response = r["response"]
-      question = r["question"]
 
       return if name.nil? or name == "" or response.nil? or response == ""
       responses = DB[:responses]
-      responses.insert(name: name, response: response, question: question)
+      responses.insert(name: name, response: response)
     end
 
     r.get "ask" do
-      responses = DB[:responses].where(name: r["name"].downcase)
-      resp = responses.order(Sequel.lit('RANDOM()')).limit(1)
-      resp.map(:response).first.to_s
+      if !r["id"].nil? and r["id"].to_i != 0
+        puts 'a'
+        resp = DB[:responses].where(name: r["id"].to_i).first
+        puts resp
+      else
+        if !r["name"].nil? and r["name"] != ""
+          responses = DB[:responses].where(name: r["name"].downcase)
+        else
+          responses = DB[:responses]
+        end
+
+        if responses.count == 0
+          responses = DB[:responses]
+        end
+
+        resp = responses.order(Sequel.lit('RANDOM()')).limit(1)
+      end
+      resp = resp.map([:name, :response]).first
+      "#{resp.first.capitalize} - \"#{resp.last}\""
+    end
+
+    # Returns the number of entries per person. Mainly to make sure we don't bloat the database.
+    r.get "info" do
+      DB[:responses].group_and_count(:name).all.to_s
+    end
+
+    r.get "list" do
+      page = r["page"].to_i ||= 0
+      responses = DB[:responses]
+      if responses.count <= page * 20 || page == 0
+        responses.limit(20, page * 20).map([:id, :name, :response]).to_s
+      end
     end
 
     r.post "seed_database" do
       responses = DB[:responses]
-      ["How can I smell my feet if they are in your mouth?", "I like green apples because they make me horny", "You mean they have a better change of being frogged checked", "Terabytes, they are like the modern day ram. Dodge Ram not computer ram.", "You tasty little poptart", "You're in timeout mr."].each do |msg|
-        responses.insert(name: "kevin", response: msg)
+      data_to_seed = ["How can I smell my feet if they are in your mouth?", "I like green apples because they make me horny", "You mean they have a better change of being frogged checked", "Terabytes, they are like the modern day ram. Dodge Ram not computer ram.", "You tasty little poptart", "You're in timeout mr."]
+
+      # Don't seed twice.):
+      if responses.where(response: data_to_seed.first) == nil
+        data_to_seed.each do |msg|
+          responses.insert(name: "kevin", response: msg)
+        end
       end
     end
   end
