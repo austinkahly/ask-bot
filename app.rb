@@ -22,9 +22,7 @@ class AskBot < Roda
 
     r.get "ask" do
       if !r["id"].nil? and r["id"].to_i != 0
-        puts 'a'
-        resp = DB[:responses].where(name: r["id"].to_i).first
-        puts resp
+        resp = DB[:responses].where(id: r["id"].to_i)
       else
         if !r["name"].nil? and r["name"] != ""
           responses = DB[:responses].where(name: r["name"].downcase)
@@ -38,8 +36,12 @@ class AskBot < Roda
 
         resp = responses.order(Sequel.lit('RANDOM()')).limit(1)
       end
-      resp = resp.map([:name, :response]).first
-      "#{resp.first.capitalize} - \"#{resp.last}\""
+      if resp.count == 0
+
+      else
+        resp = resp.map([:name, :response]).first
+        "#{resp.first.capitalize} - \"#{resp.last}\""
+      end
     end
 
     # Returns the number of entries per person. Mainly to make sure we don't bloat the database.
