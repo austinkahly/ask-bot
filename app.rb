@@ -12,6 +12,8 @@ end
 
 
 class AskBot < Roda
+  plugin :json
+
   route do |r|
     r.on "save" do
       name = r["name"].downcase
@@ -24,9 +26,9 @@ class AskBot < Roda
 
     r.on "help" do
       {
-        "response_type": "in_channel",
-        "text": "Use /ask add <name> <quote> to add new quotes."
-      }.to_json
+        response_type: "in_channel",
+        text: "Use /ask add <name> <quote> to add new quotes."
+      }
     end
 
     r.on "ask" do
@@ -49,17 +51,17 @@ class AskBot < Roda
       end
       if resp.count == 0
         {
-          "response_type": "in_channel",
-          "text": "Start quoting people to get responses."
-        }.to_json
+          response_type: "in_channel",
+          text: "Start quoting people to get responses."
+        }
 
       else
         resp = resp.map([:name, :response]).first
         {
-          "response_type": "in_channel",
-          "text": "#{resp.first.capitalize} - \"#{resp.last}\"",
-          "mrkdwn": true
-        }.to_json
+          response_type: "in_channel",
+          text: "#{resp.first.capitalize} - \"#{resp.last}\"",
+          mrkdwn: true
+        }
       end
     end
 
@@ -73,10 +75,10 @@ class AskBot < Roda
       responses = DB[:responses]
       if responses.count <= page * 20 || page == 0
         {
-          "response_type": "in_channel",
-          "text": "Page #{page}\n#{responses.limit(20, page * 20).map([:id, :name, :response]).join("\n")}",
-          "mrkdwn": true
-        }.to_json
+          response_type: "in_channel",
+          text: "Page #{page}\n#{responses.limit(20, page * 20).map([:id, :name, :response]).join("\n")}",
+          mrkdwn: true
+        }
       end
     end
   end
