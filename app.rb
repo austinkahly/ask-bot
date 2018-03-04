@@ -1,6 +1,5 @@
 require "roda"
 require "sequel"
-require "yaml"
 
 if ENV['RACK_ENV'] == 'production'
   DB = Sequel.connect(ENV['DATABASE_URL'])
