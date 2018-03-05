@@ -15,15 +15,6 @@ class AskBot < Roda
   plugin :json
 
   route do |r|
-    r.on "save" do
-      name = r["name"].downcase
-      response = r["response"]
-
-      return if name.nil? or name == "" or response.nil? or response == ""
-      responses = DB[:responses]
-      responses.insert(name: name, response: response)
-    end
-
     r.on "help" do
       {
         response_type: "in_channel",
@@ -32,36 +23,63 @@ class AskBot < Roda
     end
 
     r.on "ask" do
-      if !r["id"].nil? and r["id"].to_i != 0
-        resp = DB[:responses].where(id: r["id"].to_i)
-      else
-        # If this returns none, maybe throw an error that they need to add
-        # something for that person?
-        if !r["name"].nil? and r["name"] != ""
-          responses = DB[:responses].where(name: r["name"].downcase)
-        else
-          responses = DB[:responses]
-        end
+      if r["text"] != ""
+        command = r["text"].split(' ').first
 
+        if command == "add"
+          save_new_record(r["text"])
+        elsif command == "info"
+          {
+            text: "#{DB[:responses].group_and_count(:name).all.to_s}"
+          }
+        else # should be a name or id
+          if command.to_i != 0 # should be an id.
+            resp = DB[:responses].where(id: command.to_i)
+            if resp.count == 0
+              {
+                text: "No response found with id #{command}"
+              }
+            else
+              resp = resp.first
+              {
+                response_type: "in_channel",
+                text: "#{resp[:name].capitalize} - \"#{resp[:response]}\"",
+                mrkdwn: true
+              }
+            end
+          else # name?
+            responses = DB[:responses].where(name: command.downcase)
+            if responses.count == 0
+              {
+                response_type: "in_channel",
+                text: "No responses found for #{command}."
+              }
+            else
+              resp = responses.order(Sequel.lit('RANDOM()')).limit(1).first
+              {
+                response_type: "in_channel",
+                text: "#{resp[:name].capitalize} - \"#{resp[:response]}\"",
+                mrkdwn: true
+              }
+            end
+          end
+        end
+      else
+        responses = DB[:responses]
         if responses.count == 0
-          responses = DB[:responses]
+          {
+            response_type: "in_channel",
+            text: "Start quoting people using /ask add <name> <quote> to get responses."
+          }
+        else
+          resp = responses.order(Sequel.lit('RANDOM()')).limit(1).first
+          puts resp.inspect
+          {
+            response_type: "in_channel",
+            text: "#{resp[:name].capitalize} - \"#{resp[:response]}\"",
+            mrkdwn: true
+          }
         end
-
-        resp = responses.order(Sequel.lit('RANDOM()')).limit(1)
-      end
-      if resp.count == 0
-        {
-          response_type: "in_channel",
-          text: "Start quoting people to get responses."
-        }
-
-      else
-        resp = resp.map([:name, :response]).first
-        {
-          response_type: "in_channel",
-          text: "#{resp.first.capitalize} - \"#{resp.last}\"",
-          mrkdwn: true
-        }
       end
     end
 
@@ -78,6 +96,33 @@ class AskBot < Roda
           response_type: "in_channel",
           text: "Page #{page}\n#{responses.limit(20, page * 20).map([:id, :name, :response]).join("\n")}",
           mrkdwn: true
+        }
+      end
+    end
+  end
+
+  def save_new_record(params)
+    params = params.split(' ')
+    if params.count <= 1
+      {
+        text: "Invalid number of parameters. Please use /ask add <name> <message>"
+      }
+    else
+      command = params.shift # add
+      name = params.shift
+      response = params.join(' ')
+
+      responses = DB[:responses]
+
+      dup = responses.where(name: name.downcase, response: response)
+      if dup.count != 0
+        {
+          text: "Response #{response} already exists for #{name}"
+        }
+      else
+        id = responses.insert(name: name.downcase, response: response)
+        {
+          text: "Added #{response} to #{name} @ id #{id}"
         }
       end
     end
