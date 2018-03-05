@@ -23,7 +23,7 @@ class AskBot < Roda
     end
 
     r.on "ask" do
-      if r["text"] != ""
+      if r["text"] != "" and r["text"] != nil
         command = r["text"].split(' ').first
 
         if command == "add"
