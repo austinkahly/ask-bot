@@ -22,46 +22,36 @@ class AskBot < Roda
       }
     end
 
+    r.on "delete" do
+      id = r["id"].to_i
+      deleted = DB[:responses].where(id: id).delete
+      if deleted == 1
+        "Deleted successfully"
+      else
+        "An error occurred"
+      end
+    end
+
     r.on "ask" do
       if r["text"] != "" and r["text"] != nil
         command = r["text"].split(' ').first
 
         if command == "add"
           save_new_record(r["text"])
-        elsif command == "info"
-          {
-            text: "#{DB[:responses].group_and_count(:name).all.to_s}"
-          }
-        else # should be a name or id
-          if command.to_i != 0 # should be an id.
-            resp = DB[:responses].where(id: command.to_i)
-            if resp.count == 0
-              {
-                text: "No response found with id #{command}"
-              }
-            else
-              resp = resp.first
-              {
-                response_type: "in_channel",
-                text: "#{resp[:name].capitalize} - \"#{resp[:response]}\"",
-                mrkdwn: true
-              }
-            end
-          else # name?
-            responses = DB[:responses].where(name: command.downcase)
-            if responses.count == 0
-              {
-                response_type: "in_channel",
-                text: "No responses found for #{command}."
-              }
-            else
-              resp = responses.order(Sequel.lit('RANDOM()')).limit(1).first
-              {
-                response_type: "in_channel",
-                text: "#{resp[:name].capitalize} - \"#{resp[:response]}\"",
-                mrkdwn: true
-              }
-            end
+        else
+          responses = DB[:responses].where(name: command.downcase)
+          if responses.count == 0
+            {
+              response_type: "in_channel",
+              text: "No responses found for #{command}."
+            }
+          else
+            resp = responses.order(Sequel.lit('RANDOM()')).limit(1).first
+            {
+              response_type: "in_channel",
+              text: "#{resp[:name].capitalize} - \"#{resp[:response]}\"",
+              mrkdwn: true
+            }
           end
         end
       else
@@ -73,7 +63,6 @@ class AskBot < Roda
           }
         else
           resp = responses.order(Sequel.lit('RANDOM()')).limit(1).first
-          puts resp.inspect
           {
             response_type: "in_channel",
             text: "#{resp[:name].capitalize} - \"#{resp[:response]}\"",
@@ -90,11 +79,12 @@ class AskBot < Roda
 
     r.on "list" do
       page = r["page"].to_i ||= 0
+      puts page.inspect
       responses = DB[:responses]
       if responses.count <= page * 20 || page == 0
         {
           response_type: "in_channel",
-          text: "Page #{page}\n#{responses.limit(20, page * 20).map([:id, :name, :response]).join("\n")}",
+          text: "Page #{page}\n#{responses.limit(20, page * 20).map([:id, :name, :response]).join("\r\n")}",
           mrkdwn: true
         }
       end
