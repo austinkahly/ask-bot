@@ -17,7 +17,6 @@ class AskBot < Roda
   route do |r|
     r.on "help" do
       {
-        response_type: "in_channel",
         text: "Use /ask add <name> <quote> to add new quotes."
       }
     end
@@ -42,7 +41,6 @@ class AskBot < Roda
           responses = DB[:responses].where(name: command.downcase)
           if responses.count == 0
             {
-              response_type: "in_channel",
               text: "No responses found for #{command}."
             }
           else
@@ -58,7 +56,6 @@ class AskBot < Roda
         responses = DB[:responses]
         if responses.count == 0
           {
-            response_type: "in_channel",
             text: "Start quoting people using /ask add <name> <quote> to get responses."
           }
         else
