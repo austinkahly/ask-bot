@@ -76,7 +76,7 @@ class AskBot < Roda
 
     r.on "list" do
       # page = r["page"].to_i ||= 0
-      # responses = DB[:responses]
+      responses = DB[:responses]
       # if responses.count <= page * 20 || page == 0
       #   "Page #{page}\n#{responses.limit(20, page * 20).map([:id, :name, :response]).join("\r\n")}"
       # end
