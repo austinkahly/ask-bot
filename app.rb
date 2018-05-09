@@ -75,11 +75,12 @@ class AskBot < Roda
     end
 
     r.on "list" do
-      page = r["page"].to_i ||= 0
-      responses = DB[:responses]
-      if responses.count <= page * 20 || page == 0
-        "Page #{page}\n#{responses.limit(20, page * 20).map([:id, :name, :response]).join("\r\n")}"
-      end
+      # page = r["page"].to_i ||= 0
+      # responses = DB[:responses]
+      # if responses.count <= page * 20 || page == 0
+      #   "Page #{page}\n#{responses.limit(20, page * 20).map([:id, :name, :response]).join("\r\n")}"
+      # end
+      responses.map([:id, :name, :response])
     end
   end
 
