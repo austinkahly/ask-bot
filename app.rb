@@ -41,6 +41,7 @@ class AskBot < Roda
       data = open("https://dog.ceo/api/breed/beagle/images/random").read
       data = JSON.parse(data)
 
+      response['Content-Type'] = 'application/json'
       message = {
         response_type: "in_channel",
         attachments: [
