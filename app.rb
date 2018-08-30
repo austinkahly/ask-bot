@@ -1,5 +1,6 @@
 require "roda"
 require "sequel"
+require "open-uri"
 
 if ENV['RACK_ENV'] == 'production'
   DB = Sequel.connect(ENV['DATABASE_URL'])
