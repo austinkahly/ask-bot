@@ -15,6 +15,26 @@ class AskBot < Roda
   plugin :json
 
   route do |r|
+    r.on "shibe" do
+      url = open("http://shibe.online/api/shibes").read.gsub("[\"", "").gsub("\"]", "")
+
+      response['Content-Type'] = 'application/json'
+      {
+        response_type: "in_channel",
+        attachments: [
+          {
+            fallback: ":cool-doge:",
+            color: "#36a64f",
+            title_link: "Shibe",
+            fields: [],
+            image_url: url,
+            thumb_url: url,
+            ts: Time.now.to_i
+          }
+        ]
+      }.to_json
+    end
+
     r.on "help" do
       {
         text: "Use /ask add <name> <quote> to add new quotes."
