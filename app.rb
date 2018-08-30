@@ -37,26 +37,12 @@ class AskBot < Roda
       message.to_json
     end
 
-    r.on "beagle" do
-      data = open("https://dog.ceo/api/breed/beagle/images/random").read
-      data = JSON.parse(data)
+    r.on "golden" do
+      get_puppy_dog("retriever-golden")
+    end
 
-      response['Content-Type'] = 'application/json'
-      message = {
-        response_type: "in_channel",
-        attachments: [
-          {
-            fallback: ":dog:",
-            color: "#36a64f",
-            title_link: "Beagle!",
-            fields: [],
-            image_url: data["message"],
-            thumb_url: data["message"],
-            ts: Time.now.to_i
-          }
-        ]
-      }
-      message.to_json
+    r.on "beagle" do
+      get_puppy_dog("beagle")
     end
 
     r.on "help" do
@@ -126,6 +112,28 @@ class AskBot < Roda
       # end
       responses.map([:id, :name, :response])
     end
+  end
+
+  def get_puppy_dog(breed)
+    data = open("https://dog.ceo/api/breed/#{breed}/images/random").read
+    data = JSON.parse(data)
+
+    response['Content-Type'] = 'application/json'
+    message = {
+      response_type: "in_channel",
+      attachments: [
+        {
+          fallback: ":dog:",
+          color: "#36a64f",
+          title_link: "Beagle!",
+          fields: [],
+          image_url: data["message"],
+          thumb_url: data["message"],
+          ts: Time.now.to_i
+        }
+      ]
+    }
+    message.to_json
   end
 
   def save_new_record(params)
