@@ -19,7 +19,7 @@ class AskBot < Roda
       url = open("http://shibe.online/api/shibes").read.gsub("[\"", "").gsub("\"]", "")
 
       response['Content-Type'] = 'application/json'
-      {
+      message = {
         response_type: "in_channel",
         attachments: [
           {
@@ -32,7 +32,8 @@ class AskBot < Roda
             ts: Time.now.to_i
           }
         ]
-      }.to_json
+      }
+      message.to_json
     end
 
     r.on "help" do
