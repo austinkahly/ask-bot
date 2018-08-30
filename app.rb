@@ -37,6 +37,27 @@ class AskBot < Roda
       message.to_json
     end
 
+    r.on "beagle" do
+      data = open("https://dog.ceo/api/breed/beagle/images/random").read
+      data = JSON.parse(data)
+
+      message = {
+        response_type: "in_channel",
+        attachments: [
+          {
+            fallback: ":dog:",
+            color: "#36a64f",
+            title_link: "Beagle!",
+            fields: [],
+            image_url: data["message"],
+            thumb_url: data["message"],
+            ts: Time.now.to_i
+          }
+        ]
+      }
+      message.to_json
+    end
+
     r.on "help" do
       {
         text: "Use /ask add <name> <quote> to add new quotes."
